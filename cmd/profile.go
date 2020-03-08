@@ -49,6 +49,8 @@ func printSummary() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, padding, '.', tabwriter.Debug)
 	fmt.Fprintf(w, "Total # of files \t %s\n", util.Comma(ws.TotFileCnt))
 	fmt.Fprintf(w, "Total # of dirs \t %s\n", util.Comma(ws.TotDirCnt))
+	fmt.Fprintf(w, "Total # of symlinks \t %s\n", util.Comma(ws.TotSymlinkCnt))
+	fmt.Fprintf(w, "Total # of pipes \t %s\n", util.Comma(ws.TotPipeCnt))
 	fmt.Fprintf(w, "Aggregated file size \t %s\n", util.ShortByte(ws.TotFileSize))
 	fmt.Fprintf(w, "Skipped \t %s\n", util.Comma(ws.TotSkipped))
 	fmt.Fprintf(w, "Scanning rate \t %d/s \n", ws.Rate)

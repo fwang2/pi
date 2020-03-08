@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"time"
 
@@ -11,10 +12,12 @@ import (
 	"github.com/fwang2/pi/util"
 )
 
-// ScanResult ...
+// ScanResult ... results from single dir scan
 type ScanResult struct {
 	dirPath     string
 	fileCnt     int64
+	symlinkCnt  int64
+	pipeCnt     int64
 	dirCnt      int64
 	fileSizeAgg int64
 	fileSizeMax int64
@@ -23,16 +26,18 @@ type ScanResult struct {
 
 // WalkStat ...
 type WalkStat struct {
-	RootPath     string
-	NumOfWorkers int
-	TotSkipped   int64
-	TotFileCnt   int64
-	TotFileSize  int64
-	TotDirCnt    int64
-	Rate         int64
-	TopNFileQ    *util.SortedQueue
-	TopNDirQ     *util.SortedQueue
-	Elapsed      time.Duration
+	RootPath      string
+	NumOfWorkers  int
+	TotSkipped    int64
+	TotFileCnt    int64
+	TotFileSize   int64
+	TotDirCnt     int64
+	TotSymlinkCnt int64
+	TotPipeCnt    int64
+	Rate          int64
+	TopNFileQ     *util.SortedQueue
+	TopNDirQ      *util.SortedQueue
+	Elapsed       time.Duration
 
 	// Histogram
 	HistBins    []int64
@@ -65,11 +70,13 @@ func Walk(args ...interface{}) interface{} {
 	}
 
 	for _, file := range files {
-		if file.IsDir() {
+
+		switch mode := file.Mode(); {
+		case mode.IsDir():
 			res.dirCnt++
 			newDir := path.Join(res.dirPath, file.Name())
 			res.dirs = append(res.dirs, newDir) // save new dirs encountered
-		} else {
+		case mode.IsRegular():
 			res.fileCnt++
 			fSize := FileSize(res.dirPath, file)
 			if fSize > res.fileSizeMax {
@@ -87,6 +94,10 @@ func Walk(args ...interface{}) interface{} {
 			if wc.DoHist {
 				util.InsertLeft(ws.HistBins, ws.HistCounter, fSize)
 			}
+		case mode&os.ModeSymlink != 0:
+			res.symlinkCnt++
+		case mode&os.ModeNamedPipe != 0:
+			res.pipeCnt++
 		}
 	}
 	// handle top N dir
@@ -130,6 +141,8 @@ func Run(wc *WalkControl, ws *WalkStat) {
 			ws.TotFileCnt += result.fileCnt
 			ws.TotDirCnt += result.dirCnt
 			ws.TotFileSize += result.fileSizeAgg
+			ws.TotPipeCnt += result.pipeCnt
+			ws.TotSymlinkCnt += result.symlinkCnt
 
 			for _, d := range result.dirs {
 				mypool.Add(Walk, wc, ws, d)
