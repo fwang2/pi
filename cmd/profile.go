@@ -58,7 +58,7 @@ func printSummary() {
 	fmt.Fprintf(w, "Aggregated file size \t %s\n", util.ShortByte(ws.TotFileSize))
 	fmt.Fprintf(w, "Skipped \t %s\n", util.Comma(ws.TotSkipped))
 	fmt.Fprintf(w, "Scanning rate \t %d/s \n", ws.Rate)
-	fmt.Fprintf(w, "Elapsed time \t %v\n", ws.Elapsed)
+	fmt.Fprintf(w, "Elapsed time \t %v\n\n", ws.Elapsed)
 
 	w.Flush()
 }

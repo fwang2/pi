@@ -60,11 +60,11 @@ func TestIsSparse(t *testing.T) {
 	sparseFile := createSparseFile()
 	defer os.Remove(sparseFile)
 
-	if ok := IsSparseFile(nonSparseFile); ok {
+	if ok, _ := IsSparseFile(nonSparseFile); ok {
 		t.Error("Expected non-sparse file")
 	}
 
-	if ok := IsSparseFile(sparseFile); !ok {
+	if ok, _ := IsSparseFile(sparseFile); !ok {
 		t.Error("Expected sparse file")
 	}
 }
