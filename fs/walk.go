@@ -22,6 +22,7 @@ type ScanResult struct {
 	sparseCnt   int64
 	fileSizeAgg int64
 	fileSizeMax int64
+	skipCnt     int64
 	dirs        []string // new dirs, new jobs
 }
 
@@ -100,7 +101,11 @@ func Walk(args ...interface{}) interface{} {
 
 			// handle sparse file
 			if wc.DoSparse {
-				if IsSparseFile(path.Join(res.dirPath, file.Name())) {
+				yes, err := IsSparseFile(path.Join(res.dirPath, file.Name()))
+				if err != nil {
+					res.skipCnt++
+				}
+				if yes {
 					res.sparseCnt++
 				}
 			}
@@ -154,6 +159,7 @@ func Run(wc *WalkControl, ws *WalkStat) {
 			ws.TotFileSize += result.fileSizeAgg
 			ws.TotPipeCnt += result.pipeCnt
 			ws.TotSymlinkCnt += result.symlinkCnt
+			ws.TotSkipped += result.skipCnt
 			if wc.DoSparse {
 				ws.TotSparseCnt += result.sparseCnt
 			}

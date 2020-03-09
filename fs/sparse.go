@@ -1,7 +1,7 @@
 package fs
 
 import (
-	"fmt"
+	//"fmt"
 	"os"
 )
 
@@ -12,30 +12,30 @@ const (
 
 // IsSparse checks if a file is sparse
 // TODO: need better logging
-func IsSparse(fd *os.File) bool {
+func IsSparse(fd *os.File) (bool, error) {
 
 	holeOffset, err := fd.Seek(0, SEEK_HOLE)
 	if err != nil {
 		//fmt.Fprintf(os.Stderr, "%v\n", err)
-		return false
+		return false, err
 	}
 
 	endOffset, _ := fd.Seek(0, os.SEEK_END)
 	if err != nil {
 		//fmt.Fprintf(os.Stderr, "%v\n", err)
-		return false
+		return false, err
 	}
 
-	return !(endOffset == holeOffset)
+	return !(endOffset == holeOffset), nil
 
 }
 
 // IsSparse checks if a file is sparse
-func IsSparseFile(file string) bool {
+func IsSparseFile(file string) (bool, error) {
 	fd, err := os.Open(file)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
-		return false
+		//fmt.Fprintf(os.Stderr, "%v", err)
+		return false, err
 	}
 	defer fd.Close()
 	return IsSparse(fd)
