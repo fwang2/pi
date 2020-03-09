@@ -35,6 +35,7 @@ func IsSparseFile(file string) bool {
 	fd, err := os.Open(file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
+		return false
 	}
 	defer fd.Close()
 	return IsSparse(fd)
