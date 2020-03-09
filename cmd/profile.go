@@ -16,7 +16,8 @@ var wc *fs.WalkControl = new(fs.WalkControl)
 
 func init() {
 
-	topnCmd.Flags().BoolVar(&wc.DoHist, "hist", true, "Do histogram")
+	profileCmd.Flags().BoolVar(&wc.DoHist, "hist", true, "Do histogram")
+	profileCmd.Flags().BoolVar(&wc.DoSparse, "sparse", false, "Check sparse file")
 	var bins = topnCmd.Flags().String("bins", "4k,1m,1g,1t,32t", "histogram bins")
 	ws.HistBins = util.BinsToNum(*bins)
 	ws.HistCounter = make([]int64, len(ws.HistBins), len(ws.HistBins))
@@ -24,7 +25,7 @@ func init() {
 }
 
 func printHistogram() {
-	fmt.Printf("\n\nHistogram\n\n")
+	fmt.Printf("\nHistogram\n\n")
 	// minwidth, tabwidth, padding, padchar
 	w := tabwriter.NewWriter(os.Stdout, 8, 8, 0, ' ', tabwriter.AlignRight)
 	for k, v := range ws.HistBins {
@@ -51,6 +52,9 @@ func printSummary() {
 	fmt.Fprintf(w, "Total # of dirs \t %s\n", util.Comma(ws.TotDirCnt))
 	fmt.Fprintf(w, "Total # of symlinks \t %s\n", util.Comma(ws.TotSymlinkCnt))
 	fmt.Fprintf(w, "Total # of pipes \t %s\n", util.Comma(ws.TotPipeCnt))
+	if wc.DoSparse {
+		fmt.Fprintf(w, "Total # of sparse files \t %s\n", util.Comma(ws.TotSparseCnt))
+	}
 	fmt.Fprintf(w, "Aggregated file size \t %s\n", util.ShortByte(ws.TotFileSize))
 	fmt.Fprintf(w, "Skipped \t %s\n", util.Comma(ws.TotSkipped))
 	fmt.Fprintf(w, "Scanning rate \t %d/s \n", ws.Rate)

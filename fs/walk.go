@@ -19,6 +19,7 @@ type ScanResult struct {
 	symlinkCnt  int64
 	pipeCnt     int64
 	dirCnt      int64
+	sparseCnt   int64
 	fileSizeAgg int64
 	fileSizeMax int64
 	dirs        []string // new dirs, new jobs
@@ -34,6 +35,7 @@ type WalkStat struct {
 	TotDirCnt     int64
 	TotSymlinkCnt int64
 	TotPipeCnt    int64
+	TotSparseCnt  int64
 	Rate          int64
 	TopNFileQ     *util.SortedQueue
 	TopNDirQ      *util.SortedQueue
@@ -50,6 +52,7 @@ type WalkControl struct {
 	TopNfiles bool
 	TopNdirs  bool
 	DoHist    bool
+	DoSparse  bool
 }
 
 // Walk ...
@@ -94,6 +97,14 @@ func Walk(args ...interface{}) interface{} {
 			if wc.DoHist {
 				util.InsertLeft(ws.HistBins, ws.HistCounter, fSize)
 			}
+
+			// handle sparse file
+			if wc.DoSparse {
+				if IsSparseFile(path.Join(res.dirPath, file.Name())) {
+					res.sparseCnt++
+				}
+			}
+
 		case mode&os.ModeSymlink != 0:
 			res.symlinkCnt++
 		case mode&os.ModeNamedPipe != 0:
@@ -143,7 +154,9 @@ func Run(wc *WalkControl, ws *WalkStat) {
 			ws.TotFileSize += result.fileSizeAgg
 			ws.TotPipeCnt += result.pipeCnt
 			ws.TotSymlinkCnt += result.symlinkCnt
-
+			if wc.DoSparse {
+				ws.TotSparseCnt += result.sparseCnt
+			}
 			for _, d := range result.dirs {
 				mypool.Add(Walk, wc, ws, d)
 			}
