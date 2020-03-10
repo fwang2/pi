@@ -2,19 +2,66 @@ package fs
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"path/filepath"
 	"syscall"
 
 	"github.com/fwang2/pi/util"
 )
 
+var log = util.NewLogger()
+
 func FileExist(filename string) bool {
-    info, err := os.Stat(filename)
-    if os.IsNotExist(err) {
-        return false
-    }
-    return !info.IsDir()
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
+// CheckPath return 2 bools
+// 1: true if it exists
+// 2: true if it is directory
+// 3: true if it is file
+
+func CheckPath(p string) (bool, bool, bool) {
+	info, err := os.Stat(p)
+	if os.IsNotExist(err) {
+		return false, false, false
+	}
+	return true, info.IsDir(), info.Mode().IsRegular()
+}
+
+// DestPath constructs a full destination path
+func DestPath(srcfile string, dest string) string {
+	if !FileExist(srcfile) {
+		log.Fatalf("Source file check failed: %s\n", srcfile)
+	}
+
+	exists, isdir, isfile := CheckPath(dest)
+
+	if exists && isdir {
+		return filepath.Join(dest, srcfile)
+	}
+
+	if exists && isfile {
+		// overwrite, warning?
+		return dest
+	}
+
+	// exists check failed
+	// let see if parent exists
+	base := filepath.Base(dest)
+	parent := filepath.Dir(dest)
+	pe, _, _ := CheckPath(parent)
+	if !pe {
+		// parent doesn't exist
+		log.Fatalf("destination not valid %s\n", dest)
+	}
+
+	// parent exists
+	// e.g. ../path/parent/newfile
+	return filepath.Join(parent, base)
 }
 
 // CheckFilePath return true if file exists
@@ -23,7 +70,7 @@ func CheckFilePath(args []string) bool {
 		log.Println("Expected a file name as argument")
 		os.Exit(1)
 	}
-    return FileExist(args[0])
+	return FileExist(args[0])
 }
 
 // ParseRootPath ... only allow one root

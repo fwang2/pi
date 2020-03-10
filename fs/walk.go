@@ -3,9 +3,9 @@ package fs
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
+	"runtime"
 	"time"
 
 	"github.com/fwang2/pi/pool"
@@ -100,7 +100,7 @@ func Walk(args ...interface{}) interface{} {
 			}
 
 			// handle sparse file
-			if wc.DoSparse {
+			if wc.DoSparse && runtime.GOOS == "linux" {
 				yes, err := IsSparseFile(path.Join(res.dirPath, file.Name()))
 				if err != nil {
 					res.skipCnt++

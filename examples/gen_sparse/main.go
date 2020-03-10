@@ -5,13 +5,11 @@ import (
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/fwang2/pi/fs"
 )
 
-func main() {
-	if len(os.Args) != 3 {
-		fmt.Fprintf(os.Stderr, "\n [filename] [num_of_holes]\n")
-		os.Exit(1)
-	}
+func createSmall() {
 	num_holes, err := strconv.Atoi(os.Args[2])
 	if err != nil {
 		fmt.Printf("%v\n", err)
@@ -21,6 +19,7 @@ func main() {
 	// create a temp file
 	buf1 := []byte("12345678901234567890")
 	buf2 := []byte("abcdefghijklmnopqrst")
+
 	tmpfile, err := os.Create(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
@@ -43,4 +42,16 @@ func main() {
 	}
 
 	fmt.Println("Created", os.Args[1])
+}
+
+func main() {
+	if len(os.Args) != 3 {
+		fmt.Fprintf(os.Stderr, "Error: [filename] [num_of_holes]\n")
+		os.Exit(1)
+	}
+	num_holes, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
