@@ -9,6 +9,23 @@ import (
 	"github.com/fwang2/pi/util"
 )
 
+func FileExist(filename string) bool {
+    info, err := os.Stat(filename)
+    if os.IsNotExist(err) {
+        return false
+    }
+    return !info.IsDir()
+}
+
+// CheckFilePath return true if file exists
+func CheckFilePath(args []string) bool {
+	if len(args) == 0 || len(args) > 1 {
+		log.Println("Expected a file name as argument")
+		os.Exit(1)
+	}
+    return FileExist(args[0])
+}
+
 // ParseRootPath ... only allow one root
 // probably should check if (1) directory (2) accessible
 func ParseRootPath(args []string) string {
