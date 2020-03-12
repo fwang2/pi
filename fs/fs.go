@@ -9,6 +9,16 @@ import (
 	"github.com/fwang2/pi/util"
 )
 
+const (
+	F_BLOCK   = "b"
+	F_CHAR    = "c"
+	F_DIR     = "d"
+	F_FILE    = "f"
+	F_SYMLINK = "l"
+	F_PIPE    = "p"
+	F_SOCKET  = "s"
+)
+
 var log = util.NewLogger()
 
 func FileExist(filename string) bool {

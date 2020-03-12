@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/fwang2/fnmatch"
 	"github.com/fwang2/pi/pool"
 	"github.com/fwang2/pi/util"
 )
@@ -54,6 +55,85 @@ type WalkControl struct {
 	TopNdirs  bool
 	DoHist    bool
 	DoSparse  bool
+	Findc     *FindControl
+}
+
+func check_fsize(findc *FindControl, fsize int64) bool {
+	switch findc.SizeOp {
+	case GREAT_THAN:
+		if fsize > findc.Size {
+			return true
+		}
+	case LESS_THAN:
+		if fsize < findc.Size {
+			return true
+		}
+	case EQUAL:
+		if fsize == findc.Size {
+			return true
+		}
+	}
+	return false
+}
+
+func check_fname(findc *FindControl, fname string) bool {
+	pattern := findc.Name
+	// convert a glob pattern (wildcard form) to regex needs extra work
+	// python has this nice fnmatch built in. For golang, this one seem works
+	// found, err := regexp.MatchString(pattern, fname)
+	found := fnmatch.Match(pattern, fname, 0)
+	return found
+
+}
+
+func check_ftype(findc *FindControl, mode os.FileMode) bool {
+	switch {
+	case mode.IsDir():
+		return Has(findc.Flags, FB_TYPE_D)
+	case mode.IsRegular():
+		return Has(findc.Flags, FB_TYPE_F)
+	case mode&os.ModeSymlink != 0:
+		return Has(findc.Flags, FB_TYPE_L)
+	}
+	return false
+}
+
+func find_ioi(findc *FindControl, dir string, file os.FileInfo) bool {
+
+	if Has(findc.Flags, FB_NAME) {
+		if check_fname(findc, file.Name()) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	if Has(findc.Flags, FB_SIZE) {
+		// size info is given
+		// we check only aginst files
+		// in the case of directory (-type d)
+		// the size (filesize aggregate) must be checked at the end
+		// of directory scan
+		if Has(findc.Flags, FB_TYPE_A) && check_fsize(findc, file.Size()) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	// not searching name, not searching size
+	// only type remains
+
+	return check_ftype(findc, file.Mode())
+
+}
+
+func check_dir_size(findc *FindControl, res *ScanResult) bool {
+	if Has(findc.Flags, FB_TYPE_D) && Has(findc.Flags, FB_SIZE) {
+		return check_fsize(findc, res.fileSizeAgg)
+	} else {
+		return false
+	}
 }
 
 // Walk ...
@@ -65,6 +145,7 @@ func Walk(args ...interface{}) interface{} {
 	var wc = args[0].(*WalkControl)
 	var ws = args[1].(*WalkStat)
 	res.dirPath = args[2].(string)
+
 	files, err := ioutil.ReadDir(res.dirPath)
 	if err != nil {
 		if wc.Verbose {
@@ -75,7 +156,15 @@ func Walk(args ...interface{}) interface{} {
 
 	for _, file := range files {
 
-		switch mode := file.Mode(); {
+		fname := path.Join(res.dirPath, file.Name())
+
+		if wc.Findc != nil && find_ioi(wc.Findc, res.dirPath, file) {
+			fmt.Println(fname)
+		}
+
+		mode := file.Mode()
+
+		switch {
 		case mode.IsDir():
 			res.dirCnt++
 			newDir := path.Join(res.dirPath, file.Name())
@@ -83,6 +172,7 @@ func Walk(args ...interface{}) interface{} {
 		case mode.IsRegular():
 			res.fileCnt++
 			fSize := FileSize(res.dirPath, file)
+
 			if fSize > res.fileSizeMax {
 				res.fileSizeMax = fSize
 			}
@@ -90,8 +180,7 @@ func Walk(args ...interface{}) interface{} {
 
 			// handle top N files
 			if wc.TopNfiles {
-				ws.TopNFileQ.Put(util.Item{Name: path.Join(res.dirPath, file.Name()),
-					Val: fSize})
+				ws.TopNFileQ.Put(util.Item{Name: fname, Val: fSize})
 			}
 
 			// handle histogram
@@ -121,6 +210,10 @@ func Walk(args ...interface{}) interface{} {
 		ws.TopNDirQ.Put(util.Item{Name: res.dirPath, Val: res.dirCnt})
 	}
 
+	// handle directory level find
+	if wc.Findc != nil && check_dir_size(wc.Findc, &res) {
+		fmt.Printf("%s (%d)\n", res.dirPath, res.fileSizeAgg)
+	}
 	return res
 }
 

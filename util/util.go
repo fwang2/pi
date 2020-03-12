@@ -20,6 +20,29 @@ const (
 	GUARD = math.MaxInt64
 )
 
+var logger = NewLogger()
+
+// StrBytes convert 4k to 4*KiB
+func StrBytes(s string) int64 {
+	idx := len(s) - 1
+	num, _ := strconv.ParseInt(s[:idx], 10, 64)
+
+	unit := string(s[idx])
+	switch unit {
+	case "c", "C":
+		return num
+	case "k", "K":
+		return num * KiB
+	case "m", "M":
+		return num * MiB
+	case "g", "G":
+		return num * GiB
+	case "t", "T":
+		return num * TiB
+	}
+	return 0
+}
+
 // Item define what we can take
 type Item struct {
 	Name string
