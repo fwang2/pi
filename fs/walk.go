@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"syscall"
 	"time"
 
 	"github.com/fwang2/fnmatch"
@@ -86,6 +87,40 @@ func check_fname(findc *FindControl, fname string) bool {
 
 }
 
+// depreciated
+func compare_time(findc *FindControl, t time.Time) bool {
+	unix_time := t.UnixNano()
+	start_time := findc.StartTime.UnixNano()
+	end_time := findc.EndTime.UnixNano()
+	if unix_time > start_time && unix_time < end_time {
+		return true
+	} else {
+		return false
+	}
+}
+
+func check_time(findc *FindControl, fi os.FileInfo) bool {
+	// The following check won't do combination of
+	// of acm time, yet.
+	// https://golang.org/pkg/syscall/#Stat_t
+	stat := fi.Sys().(*syscall.Stat_t)
+	atime, mtime, ctime := util.StatsTime(stat)
+
+	switch {
+	case Has(findc.Flags, FB_ATIME):
+		return atime.Before(findc.EndTime) &&
+			atime.After(findc.StartTime)
+	case Has(findc.Flags, FB_CTIME):
+		return ctime.Before(findc.EndTime) &&
+			ctime.After(findc.StartTime)
+	case Has(findc.Flags, FB_MTIME):
+		return mtime.Before(findc.EndTime) &&
+			mtime.After(findc.StartTime)
+
+	}
+	return false
+}
+
 func check_ftype(findc *FindControl, mode os.FileMode) bool {
 	switch {
 	case mode.IsDir():
@@ -98,13 +133,14 @@ func check_ftype(findc *FindControl, mode os.FileMode) bool {
 	return false
 }
 
-func find_ioi(findc *FindControl, dir string, file os.FileInfo) bool {
+func find_ioi(findc *FindControl, dir string, file os.FileInfo) (yes bool) {
 
 	if Has(findc.Flags, FB_NAME) {
 		if check_fname(findc, file.Name()) {
-			return true
+			yes = true
 		} else {
-			return false
+			yes = false
+			return
 		}
 	}
 
@@ -115,16 +151,34 @@ func find_ioi(findc *FindControl, dir string, file os.FileInfo) bool {
 		// the size (filesize aggregate) must be checked at the end
 		// of directory scan
 		if Has(findc.Flags, FB_TYPE_A) && check_fsize(findc, file.Size()) {
-			return true
+			yes = true
 		} else {
-			return false
+			yes = false
+			return
+		}
+	}
+
+	if Has(findc.Flags, FB_ATIME|FB_CTIME|FB_MTIME) {
+		if check_time(findc, file) {
+			yes = true
+		} else {
+			yes = false
+			return
 		}
 	}
 
 	// not searching name, not searching size
 	// only type remains
 
-	return check_ftype(findc, file.Mode())
+	if Has(findc.Flags, FB_TYPE_D|FB_TYPE_F|FB_TYPE_L) {
+		if check_ftype(findc, file.Mode()) {
+			yes = true
+		} else {
+			yes = false
+			return
+		}
+	}
+	return yes
 
 }
 

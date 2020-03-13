@@ -21,13 +21,14 @@ package cmd
 
 import (
 	"regexp"
+	"time"
 
 	"github.com/fwang2/pi/fs"
 	"github.com/fwang2/pi/util"
 	"github.com/spf13/cobra"
 )
 
-var log = util.NewLogger()
+//var log = util.NewLogger()
 
 var findc = &fs.FindControl{}
 
@@ -35,6 +36,9 @@ var fname string
 var fsize string
 var ftype string
 var apparent bool
+var atime string
+var ctime string
+var mtime string
 
 var f_map = map[string]bool{
 	fs.F_FILE: true, // file
@@ -47,17 +51,20 @@ var f_map = map[string]bool{
 }
 
 func init() {
-	findCmd.Flags().StringVar(&fname, "name", "", "find based on name pattern")
-	findCmd.Flags().StringVar(&fsize, "size", "", "find based on size")
-	findCmd.Flags().BoolVar(&apparent, "apparent", true, "find based on apparent size")
-	findCmd.Flags().StringVar(&ftype, "type", "", "find based on file type")
+	findCmd.Flags().StringVar(&fname, "name", "", "On name pattern")
+	findCmd.Flags().StringVar(&fsize, "size", "", "On file size")
+	findCmd.Flags().BoolVar(&apparent, "apparent", true, "Use apparent size")
+	findCmd.Flags().StringVar(&ftype, "type", "", "On file type")
+	findCmd.Flags().StringVar(&atime, "atime", "", "Access time (e.g 4h30m)")
+	findCmd.Flags().StringVar(&ctime, "ctime", "", "Creation time (e.g 4h30m)")
+	findCmd.Flags().StringVar(&mtime, "mtime", "", "Modification time (e.g 4h30m)")
 
 	rootCmd.AddCommand(findCmd)
 }
 
 var findCmd = &cobra.Command{
 	Use:   "find",
-	Short: "A subset of Unix find functions",
+	Short: "A subset of Unix find-alike functions",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -78,6 +85,8 @@ var findCmd = &cobra.Command{
 			findc.Flags = fs.Set(findc.Flags, fs.FB_TYPE_D)
 			findc.Flags = fs.Set(findc.Flags, fs.FB_TYPE_L)
 		}
+		parse_time()
+
 		log.Debugf("findc.Flags = %b", findc.Flags)
 		// Determine path
 		var ws *fs.WalkStat = new(fs.WalkStat)
@@ -90,6 +99,32 @@ var findCmd = &cobra.Command{
 	},
 }
 
+func parse_time() {
+	// for now, we only handle time util now.
+	var t string
+	if atime != "" {
+		t = atime
+		findc.Flags = fs.Set(findc.Flags, fs.FB_ATIME)
+	} else if mtime != "" {
+		t = mtime
+		findc.Flags = fs.Set(findc.Flags, fs.FB_MTIME)
+	} else if ctime != "" {
+		t = ctime
+		findc.Flags = fs.Set(findc.Flags, fs.FB_CTIME)
+	} else {
+		return 
+	}
+
+	du, err := util.ParseDuration(t)
+	if err != nil {
+		log.Fatalf("Wrong time format: %s", t)
+	}
+	findc.EndTime = time.Now()
+	findc.StartTime = findc.EndTime.Add(-du)
+
+	log.Debugf("start_time = %v, end_time = %v", findc.StartTime, findc.EndTime)
+
+}
 func parse_ftype(s string) {
 	if !f_map[s] {
 		log.Fatalf("can't parse file type: %s. Must be one of {dfl}", s)
