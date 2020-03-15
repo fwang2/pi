@@ -51,12 +51,13 @@ type WalkStat struct {
 
 // WalkControl ...
 type WalkControl struct {
-	Verbose   bool
-	TopNfiles bool
-	TopNdirs  bool
-	DoHist    bool
-	DoSparse  bool
-	Findc     *FindControl
+	Verbose    bool
+	TopNfiles  bool
+	TopNdirs   bool
+	DoHist     bool
+	DoSparse   bool
+	ExcludeMap map[string]bool
+	Findc      *FindControl
 }
 
 func check_fsize(findc *FindControl, fsize int64) bool {
@@ -222,6 +223,12 @@ func Walk(args ...interface{}) interface{} {
 		case mode.IsDir():
 			res.dirCnt++
 			newDir := path.Join(res.dirPath, file.Name())
+
+			if wc.ExcludeMap[newDir] {
+				log.Debug("Excluding ... ", newDir)
+				break
+			}
+
 			res.dirs = append(res.dirs, newDir) // save new dirs encountered
 		case mode.IsRegular():
 			res.fileCnt++

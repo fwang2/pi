@@ -24,26 +24,42 @@ go get -u github.com/fwang2/pi
 
 This will be the binary **pi** into your `GOPATH`, by default, it is your `$HOME/go/bin`.
 
-## Usage
+## Examples
+
+### List top n largest files and directories
+
 ```
-11:13:37 ▶ pi -h       
-pi is a suite of file system tools
-
-Usage:
-  pi [command]
-
-Available Commands:
-  help        Help about any command
-  profile     General file system profiling
-  topn        Find top N items of interest
-
-Flags:
-  -h, --help      help for pi
-      --np int    Number of worker threads (default 8)
-  -v, --verbose   verbose output
-
-Use "pi [command] --help" for more information about a command.
+▶ pi topn .
 ```
+
+### Profiling and show file distributions
+
+```
+▶ pi profile --hist .
+```
+
+`--hist` is to build histogram of file distribution. It is turned off by default.
+
+### Find all files of size greater than 100M, created within last 7 days
+
+```
+▶ pi find / --type f --size +10m --ctime 7d
+```
+### Create tar.gz 
+
+```
+▶ pi zip /path/to/project -o project.tar.gz
+```
+
+This can be helpful if you have large files and feels tar/zip is taking too long. The compression itself is parallelized, but subsequent tar still have room to improve though. 
+
+
+### Check sparse file (Linux only)
+
+```
+▶ pi sparse-check /path/to/sparsefile
+```
+
 
 ## Demo
 
