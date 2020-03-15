@@ -6,11 +6,8 @@ import (
 	"runtime"
 
 	"github.com/fwang2/pi/fs"
-	"github.com/fwang2/pi/util"
 	"github.com/spf13/cobra"
 )
-
-var log = util.NewLogger()
 
 func init() {
 	rootCmd.AddCommand(cpCmd)

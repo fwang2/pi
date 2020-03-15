@@ -5,11 +5,13 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/fwang2/pi/util"
 	"github.com/spf13/cobra"
 )
 
 var Verbose bool
 var NumOfWorkers int
+var log = util.NewLogger()
 
 var rootCmd = &cobra.Command{
 	Use:   "pi",
