@@ -61,13 +61,3 @@ This can be helpful if you have large files and feels tar/zip is taking too long
 ```
 
 
-## Demo
-
-![](doc/tty.gif)
-
-## Naming
-
-I thought about using "pie" as the name, who doesn't like a piece of pie? But, "pi" is one letter short, and that is more important :grin:
-
-
-
