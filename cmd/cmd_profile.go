@@ -87,7 +87,9 @@ func printSummary() {
 		fmt.Fprintf(w, "Total # of sparse files \t %s\n", util.Comma(ws.TotSparseCnt))
 	}
 	fmt.Fprintf(w, "Avg file size \t %s\n", util.ShortByte(ws.TotFileSize/ws.TotFileCnt))
-	fmt.Fprintf(w, "Avg # of entries per directory \t %s\n", util.Comma(ws.TotFileCnt/ws.TotDirCnt))
+        if ws.TotDirCnt != 0 {
+		fmt.Fprintf(w, "Avg # of entries per directory \t %s\n", util.Comma(ws.TotFileCnt/ws.TotDirCnt))
+	}
 	fmt.Fprintf(w, "Aggregated file size \t %s\n", util.ShortByte(ws.TotFileSize))
 	fmt.Fprintf(w, "Skipped \t %s\n", util.Comma(ws.TotSkipped))
 	fmt.Fprintf(w, "Scanning rate \t %d/s \n", ws.Rate)
