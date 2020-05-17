@@ -15,6 +15,13 @@ const (
 	FB_CTIME
 )
 
+const (
+	IOI_NAME Bits = 1 << iota
+	IOI_SIZE
+	IOI_TYPE
+	IOI_TIME
+)
+
 func Set(b, flag Bits) Bits    { return b | flag }
 func Clear(b, flag Bits) Bits  { return b &^ flag }
 func Toggle(b, flag Bits) Bits { return b ^ flag }

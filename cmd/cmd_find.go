@@ -75,6 +75,7 @@ var findCmd = &cobra.Command{
 		}
 		if fsize != "" {
 			parse_fsize(fsize)
+			findc.Flags = fs.Set(findc.Flags, fs.FB_SIZE)
 			findc.Apparent = apparent
 		}
 		if ftype != "" {
@@ -82,8 +83,8 @@ var findCmd = &cobra.Command{
 		} else {
 			// if not ftype specified, default it f
 			findc.Flags = fs.Set(findc.Flags, fs.FB_TYPE_F)
-			findc.Flags = fs.Set(findc.Flags, fs.FB_TYPE_D)
-			findc.Flags = fs.Set(findc.Flags, fs.FB_TYPE_L)
+			//findc.Flags = fs.Set(findc.Flags, fs.FB_TYPE_D)
+			//findc.Flags = fs.Set(findc.Flags, fs.FB_TYPE_L)
 		}
 		parse_time()
 
@@ -112,7 +113,7 @@ func parse_time() {
 		t = ctime
 		findc.Flags = fs.Set(findc.Flags, fs.FB_CTIME)
 	} else {
-		return 
+		return
 	}
 
 	du, err := util.ParseDuration(t)

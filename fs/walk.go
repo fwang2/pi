@@ -135,14 +135,17 @@ func check_ftype(findc *FindControl, mode os.FileMode) bool {
 }
 
 func find_ioi(findc *FindControl, dir string, file os.FileInfo) (yes bool) {
+	var ioi_flag Bits
 
 	if Has(findc.Flags, FB_NAME) {
 		if check_fname(findc, file.Name()) {
-			yes = true
+			ioi_flag = Set(ioi_flag, IOI_NAME)
 		} else {
 			yes = false
 			return
 		}
+	} else {
+		ioi_flag = Set(ioi_flag, IOI_NAME)
 	}
 
 	if Has(findc.Flags, FB_SIZE) {
@@ -151,35 +154,41 @@ func find_ioi(findc *FindControl, dir string, file os.FileInfo) (yes bool) {
 		// in the case of directory (-type d)
 		// the size (filesize aggregate) must be checked at the end
 		// of directory scan
-		if Has(findc.Flags, FB_TYPE_A) && check_fsize(findc, file.Size()) {
-			yes = true
+
+		if check_fsize(findc, file.Size()) {
+			ioi_flag = Set(ioi_flag, IOI_SIZE)
 		} else {
 			yes = false
 			return
 		}
+	} else {
+		ioi_flag = Set(ioi_flag, IOI_SIZE)
 	}
 
 	if Has(findc.Flags, FB_ATIME|FB_CTIME|FB_MTIME) {
 		if check_time(findc, file) {
-			yes = true
+			ioi_flag = Set(ioi_flag, IOI_TIME)
 		} else {
 			yes = false
 			return
 		}
+	} else {
+		ioi_flag = Set(ioi_flag, IOI_TIME)
 	}
-
-	// not searching name, not searching size
-	// only type remains
 
 	if Has(findc.Flags, FB_TYPE_D|FB_TYPE_F|FB_TYPE_L) {
 		if check_ftype(findc, file.Mode()) {
-			yes = true
+			ioi_flag = Set(ioi_flag, IOI_TYPE)
 		} else {
 			yes = false
 			return
 		}
+	} else {
+		ioi_flag = Set(ioi_flag, IOI_TYPE)
 	}
-	return yes
+
+	return Has(ioi_flag, IOI_NAME) && Has(ioi_flag, IOI_TYPE) &&
+		Has(ioi_flag, IOI_TIME) && Has(ioi_flag, IOI_SIZE)
 
 }
 
