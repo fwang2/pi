@@ -115,6 +115,7 @@ var profileCmd = &cobra.Command{
 		ws.RootPath = fs.ParseRootPath(args)
 		wc.TopNdirs = false
 		wc.TopNfiles = false
+		wc.DoProgress = true 
 		fs.WalkPrologue(ws)
 		start := time.Now()
 		fs.Run(wc, ws)
