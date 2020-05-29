@@ -28,6 +28,8 @@ func str2level(loglevel string) log.Level {
 
 }
 
+// To setup logging through env variable
+// export PI_LOG="debug"
 func NewLogger() *log.Logger {
 	var log = log.New()
 

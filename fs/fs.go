@@ -42,6 +42,9 @@ func CheckPath(p string) (bool, bool, bool) {
 	return true, info.IsDir(), info.Mode().IsRegular()
 }
 
+
+
+
 // DestPath constructs a full destination path
 func DestPath(srcfile string, dest string) string {
 	if !FileExist(srcfile) {

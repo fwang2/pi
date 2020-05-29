@@ -55,7 +55,7 @@ var topnCmd = &cobra.Command{
 		wc.TopNfiles = true
 		fs.WalkPrologue(ws)
 		start := time.Now()
-		fs.Run(wc, ws)
+		fs.RunProfile(wc, ws)
 		fs.CalcRate(start, ws)
 		topnEpilogue(ws)
 	},

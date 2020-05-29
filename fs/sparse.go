@@ -20,7 +20,7 @@ func IsSparse(fd *os.File) (bool, error) {
 		return false, err
 	}
 
-	endOffset, _ := fd.Seek(0, os.SEEK_END)
+	endOffset, err := fd.Seek(0, os.SEEK_END)
 	if err != nil {
 		//fmt.Fprintf(os.Stderr, "%v\n", err)
 		return false, err

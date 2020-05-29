@@ -96,7 +96,7 @@ var findCmd = &cobra.Command{
 		ws.NumOfWorkers = NumOfWorkers
 		var wc *fs.WalkControl = new(fs.WalkControl)
 		wc.Findc = findc
-		fs.Run(wc, ws)
+		fs.RunProfile(wc, ws)
 	},
 }
 

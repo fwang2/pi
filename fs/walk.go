@@ -299,8 +299,25 @@ func WalkProgressReport(ws *WalkStat) {
 		util.Comma(ws.TotDirCnt+ws.TotFileCnt), util.Comma(ws.TotSkipped))
 }
 
-// Run ...
-func Run(wc *WalkControl, ws *WalkStat) {
+// Run ... this is entry function for both profile, find, and topn operation
+// In this function, we set up a pool with a fixed number of workers
+// We put the initial work item(s) or job(s) in the pool by:
+// mypool.Add(...)
+// It takes a functions and its argument list
+// mypool will run this function, in this case the `Walk()` function
+//
+// Walk() function in this case will scan the directory, tally the stats
+// and return another list of sub-directories for further scan
+//
+// Run() will wait for job and its return - the returned sub-directories are each
+// put into the pool as a different job to walk.
+//
+// Esssentially, the Walk() expects a directory to talk, that is the job.
+// it recursively traverse into subdirectories, until no more no job to put
+// in to the pool. When all jobs are done, pool will return nil
+// the for-loop will break out.
+
+func RunProfile(wc *WalkControl, ws *WalkStat) {
 	mypool := pool.New(ws.NumOfWorkers)
 	mypool.Run()
 	mypool.Add(Walk, wc, ws, ws.RootPath)

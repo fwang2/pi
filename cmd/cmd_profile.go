@@ -87,7 +87,7 @@ func printSummary() {
 		fmt.Fprintf(w, "Total # of sparse files \t %s\n", util.Comma(ws.TotSparseCnt))
 	}
 	fmt.Fprintf(w, "Avg file size \t %s\n", util.ShortByte(ws.TotFileSize/ws.TotFileCnt))
-        if ws.TotDirCnt != 0 {
+	if ws.TotDirCnt != 0 {
 		fmt.Fprintf(w, "Avg # of entries per directory \t %s\n", util.Comma(ws.TotFileCnt/ws.TotDirCnt))
 	}
 	fmt.Fprintf(w, "Aggregated file size \t %s\n", util.ShortByte(ws.TotFileSize))
@@ -117,7 +117,7 @@ var profileCmd = &cobra.Command{
 		wc.TopNfiles = false
 		fs.WalkPrologue(ws)
 		start := time.Now()
-		fs.Run(wc, ws)
+		fs.RunProfile(wc, ws)
 		fs.CalcRate(start, ws)
 		profileEpilogue(ws)
 	},
