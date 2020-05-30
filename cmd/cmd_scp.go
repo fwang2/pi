@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(cpCmd)
+	rootCmd.AddCommand(scpCmd)
 }
 
 var scpCmd = &cobra.Command{
