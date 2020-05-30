@@ -13,7 +13,7 @@ func init() {
 	rootCmd.AddCommand(cpCmd)
 }
 
-var cpCmd = &cobra.Command{
+var scpCmd = &cobra.Command{
 	Use:   "scp",
 	Short: "copy file to file (sparse aware",
 	Args:  cobra.ExactArgs(2),
