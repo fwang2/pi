@@ -95,6 +95,7 @@ var findCmd = &cobra.Command{
 		ws.RootPath = fs.ParseRootPath(args)
 		ws.NumOfWorkers = NumOfWorkers
 		var wc *fs.WalkControl = new(fs.WalkControl)
+		wc.DoProgress = false  
 		wc.Findc = findc
 		fs.RunProfile(wc, ws)
 	},
