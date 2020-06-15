@@ -36,6 +36,7 @@ var fname string
 var fsize string
 var ftype string
 var apparent bool
+var delete bool
 var atime string
 var ctime string
 var mtime string
@@ -58,6 +59,7 @@ func init() {
 	findCmd.Flags().StringVar(&atime, "atime", "", "Access time (e.g 4h30m)")
 	findCmd.Flags().StringVar(&ctime, "ctime", "", "Creation time (e.g 4h30m)")
 	findCmd.Flags().StringVar(&mtime, "mtime", "", "Modification time (e.g 4h30m)")
+	findCmd.Flags().BoolVar(&delete, "delete", false, "delete files")
 
 	rootCmd.AddCommand(findCmd)
 }
@@ -78,6 +80,11 @@ var findCmd = &cobra.Command{
 			findc.Flags = fs.Set(findc.Flags, fs.FB_SIZE)
 			findc.Apparent = apparent
 		}
+
+		if delete {
+			findc.DeleteFlag = true
+		}
+
 		if ftype != "" {
 			parse_ftype(ftype)
 		} else {

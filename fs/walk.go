@@ -58,7 +58,7 @@ type WalkControl struct {
 	DoSparse   bool
 	ExcludeMap map[string]bool
 	Findc      *FindControl
-	DoProgress bool 
+	DoProgress bool
 }
 
 func check_fsize(findc *FindControl, fsize int64) bool {
@@ -137,7 +137,7 @@ func check_ftype(findc *FindControl, mode os.FileMode) bool {
 
 // find_ioi ... locate the item of interests (ioi). ioi is checked upon
 // name, size, type, time. We don't have support for OR combination. So
-// each condition is combined with AND. 
+// each condition is combined with AND.
 func find_ioi(findc *FindControl, dir string, file os.FileInfo) (yes bool) {
 	var ioi_flag Bits
 
@@ -228,6 +228,12 @@ func Walk(args ...interface{}) interface{} {
 
 		if wc.Findc != nil && find_ioi(wc.Findc, res.dirPath, file) {
 			fmt.Println(fname)
+			if wc.Findc.DeleteFlag {
+				err := os.Remove(fname)
+				if err != nil {
+					log.Warningf("Can't remove %s, %s\n", fname, err)
+				}
+			}
 		}
 
 		mode := file.Mode()
