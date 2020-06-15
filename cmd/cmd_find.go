@@ -95,7 +95,7 @@ var findCmd = &cobra.Command{
 		ws.RootPath = fs.ParseRootPath(args)
 		ws.NumOfWorkers = NumOfWorkers
 		var wc *fs.WalkControl = new(fs.WalkControl)
-		wc.DoProgress = false  
+		wc.DoProgress = false
 		wc.Findc = findc
 		fs.RunProfile(wc, ws)
 	},
@@ -117,12 +117,17 @@ func parse_time() {
 		return
 	}
 
-	du, err := util.ParseDuration(t)
+	du, neg, err := util.ParseDuration(t)
 	if err != nil {
 		log.Fatalf("Wrong time format: %s", t)
 	}
-	findc.EndTime = time.Now()
-	findc.StartTime = findc.EndTime.Add(-du)
+	if neg {
+		findc.EndTime = time.Now()
+		findc.StartTime = findc.EndTime.Add(-du)
+	} else {
+		findc.StartTime = time.Unix(0, 0)
+		findc.EndTime = time.Now().Add(-du)
+	}
 
 	log.Debugf("start_time = %v, end_time = %v", findc.StartTime, findc.EndTime)
 
