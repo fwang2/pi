@@ -65,8 +65,19 @@ const (
 	J_SYMLINK
 )
 
+// the def can be problematic
+// not true enum
+// we don't diff between COPY_D2D and F2D
+// both are handled by RunCopy()
+const (
+	COPY_SFF = iota // single file to file
+	COPY_D2D        // directory to directory
+	COPY_F2D        // file to directory
+)
+
 type CopyControl struct {
 	NumOfWorkers int
+	CopyMode     int
 }
 
 type CopyStat struct {
