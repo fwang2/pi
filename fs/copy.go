@@ -70,7 +70,7 @@ const (
 // we don't diff between COPY_D2D and F2D
 // both are handled by RunCopy()
 const (
-	COPY_SFF = iota // single file to file
+	COPY_F2F = iota // single file to file
 	COPY_D2D        // directory to directory
 	COPY_F2D        // file to directory
 )

@@ -42,11 +42,17 @@ var cpCmd = &cobra.Command{
 		//
 		log.Debugf("command line args: %v\n", args)
 		sourceExist, _, sourceIsFile := fs.CheckPath(args[0])
-		destExist, _, destIsFile := fs.CheckPath(args[len(args)-1])
+		destExist, destIsDir, destIsFile := fs.CheckPath(args[len(args)-1])
 		if sourceExist && sourceIsFile && len(args) == 2 {
 			sources = append(sources, args[0])
 			dest = args[1]
-			copyMode = fs.COPY_SFF
+			copyMode = fs.COPY_F2F
+			if destExist && destIsDir {
+				// destination exists as a directory
+				dest, err = filepath.Abs(dest)
+				sourceBase := filepath.Base(args[0])
+				dest = filepath.Join(dest, sourceBase)
+			}
 			return
 		}
 
@@ -80,7 +86,7 @@ var cpCmd = &cobra.Command{
 		cc.NumOfWorkers = NumOfWorkers
 		// start := time.Now()
 		log.Debugf("sources = %v, dest = %s \n", sources, dest)
-		if copyMode == fs.COPY_SFF {
+		if copyMode == fs.COPY_F2F {
 			fs.CopyFile(sources[0], dest)
 		} else {
 			fs.RunCopy(cc, sources, dest)
