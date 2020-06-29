@@ -26,7 +26,7 @@ func topnEpilogue(ws *fs.WalkStat) {
 func printTopNdir(items util.ItemList) {
 	fmt.Printf("\n\nTop count on directory entries\n\n")
 	for i := len(items) - 1; i >= 0; i-- {
-		fmt.Printf("\t%s (%s) \n", items[i].Name, util.ShortNum(items[i].Val))
+		fmt.Printf("\t%s (%s) \n", items[i].Name, util.Comma(items[i].Val))
 	}
 	fmt.Printf("\n")
 }

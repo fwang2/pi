@@ -12,6 +12,7 @@ import (
 var cc *fs.CopyControl = new(fs.CopyControl)
 var sources []string
 var dest string
+var copyMode int // control which function to run
 
 func init() {
 	rootCmd.AddCommand(cpCmd)
@@ -40,10 +41,26 @@ var cpCmd = &cobra.Command{
 		// directory to directory
 		//
 		log.Debugf("command line args: %v\n", args)
+		sourceExist, _, sourceIsFile := fs.CheckPath(args[0])
+		destExist, destIsDir, destIsFile := fs.CheckPath(args[len(args)-1])
+		if sourceExist && sourceIsFile && len(args) == 2 {
+			sources = append(sources, args[0])
+			dest = args[1]
+			copyMode = fs.COPY_F2F
+			if destExist && destIsDir {
+				// destination exists as a directory
+				dest, err = filepath.Abs(dest)
+				sourceBase := filepath.Base(args[0])
+				dest = filepath.Join(dest, sourceBase)
+			}
+			return
+		}
+
+		// file to directory copy
+		copyMode = fs.COPY_F2D
 		lastArg := args[len(args)-1]
-		isExist, _, isFile := fs.CheckPath(lastArg)
-		if isExist {
-			if isFile {
+		if destExist {
+			if destIsFile {
 				log.Fatalf("Taget exists as file: %s\n", lastArg)
 			} else {
 				log.Warningf("Target exists as directory: %s\n", lastArg)
@@ -69,6 +86,10 @@ var cpCmd = &cobra.Command{
 		cc.NumOfWorkers = NumOfWorkers
 		// start := time.Now()
 		log.Debugf("sources = %v, dest = %s \n", sources, dest)
-		fs.RunCopy(cc, sources, dest)
+		if copyMode == fs.COPY_F2F {
+			fs.CopyFile(sources[0], dest)
+		} else {
+			fs.RunCopy(cc, sources, dest)
+		}
 	},
 }

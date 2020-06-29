@@ -54,7 +54,7 @@ var f_map = map[string]bool{
 func init() {
 	findCmd.Flags().StringVar(&fname, "name", "", "On name pattern")
 	findCmd.Flags().StringVar(&fsize, "size", "", "On file size")
-	findCmd.Flags().BoolVar(&apparent, "apparent", true, "Use apparent size")
+	findCmd.Flags().BoolVar(&apparent, "apparent", false, "Use apparent size")
 	findCmd.Flags().StringVar(&ftype, "type", "", "On file type")
 	findCmd.Flags().StringVar(&atime, "atime", "", "Access time (e.g 4h30m)")
 	findCmd.Flags().StringVar(&ctime, "ctime", "", "Creation time (e.g 4h30m)")

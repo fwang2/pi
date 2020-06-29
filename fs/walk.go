@@ -287,7 +287,7 @@ func Walk(args ...interface{}) interface{} {
 	}
 	// handle top N dir
 	if wc.TopNdirs {
-		ws.TopNDirQ.Put(util.Item{Name: res.dirPath, Val: res.dirCnt})
+		ws.TopNDirQ.Put(util.Item{Name: res.dirPath, Val: int64(len(files))})
 	}
 
 	// handle directory level find
