@@ -16,13 +16,22 @@ DNE2](http://cdn.opensfs.org/wp-content/uploads/2015/04/Scalability-Testing-of-D
 or GPFS's distributed meta node handling. It remains to be see if this is good
 enough for a full system scan.
 
-## Install
+## Local install
+
+Assuming you have golang installed and available on your `PATH`:
 
 ```
 go get -u github.com/fwang2/pi
 ```
 
 This will be the binary **pi** into your `GOPATH`, by default, it is your `$HOME/go/bin`.
+
+## On Summit
+
+```
+module use /sw/exp9/spack/modules/linux-rhel7-power8le
+module load pi
+```
 
 ## Examples
 
