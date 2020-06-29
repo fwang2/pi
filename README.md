@@ -26,12 +26,26 @@ go get -u github.com/fwang2/pi
 
 This will be the binary **pi** into your `GOPATH`, by default, it is your `$HOME/go/bin`.
 
-## On Summit
+## On Summit or Rhea
+
+On Summit (POWER arch)
+```
+module use /sw/exp9/spack/modules/linux-rhel7-power91e
+```
+
+On Rhea (x86)
+```
+module use /sw/exp9/linux-rhel7-sandybridge
+```
+
+Assume above module use is okay, then:
 
 ```
-module use /sw/exp9/spack/modules/linux-rhel7-power8le
 module load pi
 ```
+
+will make pi available to use.
+
 
 ## Examples
 
