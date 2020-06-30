@@ -4,7 +4,7 @@ This is a Go implementation of parallel tree walk and a suite of file system too
 
 On the OLCF's Summit production file system, a 250 PB, GPFS-based parallel file
 system, we measured over 200,000 ops/seconds scanning rate, on a single IBM
-POWER9 node running with 128 threads. It should be more than sufficient for
+POWER9 node running with 128 threads. It should be decent for
 regular use. 
 
 That said, HPC
@@ -16,9 +16,9 @@ DNE2](http://cdn.opensfs.org/wp-content/uploads/2015/04/Scalability-Testing-of-D
 or GPFS's distributed meta node handling. It remains to be see if this is good
 enough for a full system scan.
 
-## Local install
+## Local install (MacOS)
 
-Assuming you have golang installed and available on your `PATH`:
+Assuming you have golang installed and available on your `PATH` (For example, `brew install go`), all you need to do:
 
 ```
 go get -u github.com/fwang2/pi
@@ -63,11 +63,14 @@ will make pi available to use.
 
 `--hist` is to build histogram of file distribution. It is turned off by default.
 
-### Find all files of size greater than 100M, created within last 7 days
+### Find all files of size greater than 100M, modified a week before: 
 
 ```
-▶ pi find / --type f --size +10m --ctime 7d
+▶ pi find / --type f --size +100m --mtime 7d
 ```
+
+`pi` interpret `7d` the same as `+7d`. To negate and search for changes within a week, use `-7d` instead. 
+
 ### Create tar.gz 
 
 ```
